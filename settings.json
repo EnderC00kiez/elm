@@ -1,0 +1,12 @@
+{
+    "disallow-reading-redir": true,
+    "csrf-protection": true,
+    "werkzeug-server": false,
+    "werkzeug-debug": false,
+    "custom-error-pages": true,
+    "http-headers": {
+        "X-Content-Security-Policy": "default-src 'self'",
+        "X-Frame-Options": "SAMEORIGIN",
+        "Server": "elm/0.2.9"
+    }
+}
