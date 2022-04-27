@@ -2,8 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 import os
 from json import load
 from werkzeug.exceptions import HTTPException
-
-
 from jinja2 import TemplateNotFound
 
 # load config
@@ -26,12 +24,19 @@ def add_headers(r):
 def index():
     return render_template('index.html')
 
-@app.route('/returnerror/<erorrcode>')
+@app.route('/returnerror/<errorcode>')
 def returnerror(errorcode):
     try:
         abort(int(errorcode))
-    except:
-        abort(500)
+    except LookupError:
+        return 'LookupError while processing request', 500
+
+@app.route('/throwdebuggingexception')
+def throwdebugexception():
+    if app.debug:
+        raise
+    else:
+        return 'app is not debuggable, as debug is not true'
 
 @app.route('/teapot')
 def teapot():
@@ -84,6 +89,9 @@ def dynamicpage(page):
             # scan for pages with same filename, but if there are multiple, return 422
             for f in os.listdir(os.path.join(app.root_path, 'templates')):
                 if f.startswith(page):
+                    if f.endswith('.redir'):
+                        with open("templates/" + f, 'r') as redirfile:
+                            return redirect(redirfile.read())
                     pages.append(f)
             if len(pages) > 1:
                 abort(422)
@@ -92,10 +100,11 @@ def dynamicpage(page):
     # if there are no files with the same name, return 404
     if not page in os.listdir(os.path.join(app.root_path, 'templates')):
         abort(404)
-    return render_template(page)
+    if not page.endswith('.redir'):
+        return render_template(page)
+    else:
+        abort(403)
 
                 
 if __name__ == '__main__' and config['werkzeug-server']:
     app.run(host='0.0.0.0', port=80, debug=config['werkzeug-debug'])
-    
-

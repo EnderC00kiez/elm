@@ -1,8 +1,7 @@
 {
     "disallow-reading-redir": true,
-    "csrf-protection": true,
-    "werkzeug-server": false,
-    "werkzeug-debug": false,
+    "werkzeug-server": true,
+    "werkzeug-debug": true,
     "custom-error-pages": true,
     "http-headers": {
         "X-Content-Security-Policy": "default-src 'self'",
