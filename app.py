@@ -90,28 +90,30 @@ def favicon():
 
 @app.route('/<page>')
 def dynamicpage(page):
+    if config['disallow-reading-redir'] is True:
+        if page.endswith('.redir'):
+            abort(403)
     pages = []
-    if not page.endswith('.redir'):
-        # if page dosn't have a period in it
-        if not '.' in page:
-            # scan for pages with same filename, but if there are multiple, return 422
-            for f in os.listdir(os.path.join(app.root_path, 'templates')):
-                if f.startswith(page):
-                    if f.endswith('.redir'):
-                        with open("templates/" + f, 'r') as redirfile:
-                            return redirect(redirfile.read())
-                    pages.append(f)
-            if len(pages) > 1:
-                abort(422)
-            elif len(pages) == 1:
-                page = pages[0]
-    # if there are no files with the same name, return 404
-    if not page in os.listdir(os.path.join(app.root_path, 'templates')):
-        abort(404)
-    if not page.endswith('.redir'):
+    if '.' in page:
         return render_template(page)
+    # if page dosn't have a period in it
     else:
-        abort(403)
+        # scan for pages with same filename, but if there are multiple, return 422
+        for f in os.listdir(os.path.join(app.root_path, 'templates')):
+            if f.startswith(page):
+                if f.endswith('.redir'):
+                    with open("templates/" + f, 'r') as redirfile:
+                        return redirect(redirfile.read())
+                pages.append(f)
+        if len(pages) > 1:
+            abort(422)
+        elif len(pages) == 1:
+            page = pages[0]
+            return render_template(page)
+        
+ # if there are no files with the same name, return 404
+#if not page in os.listdir(os.path.join(app.root_path, 'templates')):
+    #abort(404)
 
                 
 if __name__ == '__main__' and config['werkzeug-server']:
