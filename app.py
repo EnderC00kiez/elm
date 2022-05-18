@@ -3,12 +3,19 @@ import os
 from json import load
 from werkzeug.exceptions import HTTPException
 from jinja2 import TemplateNotFound
+import logging, time
+from flask_compress import Compress
+
+logging.basicConfig(filename="logs.log", level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s  %(message)s\n', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 # load config
 with open('settings.json') as config_file:
     config = load(config_file)
 
 app = Flask(__name__, root_path=os.path.dirname(os.path.abspath(__file__)))
+Compress(app)
+app.config['COMPRESS_ALGORITHM'] = config['compression-algorithm']
 
 # inject headers defined in config
 @app.after_request
@@ -34,7 +41,7 @@ def returnerror(errorcode):
 @app.route('/throwdebuggingexception')
 def throwdebugexception():
     if app.debug:
-        raise
+        raise Exception
     else:
         return 'app is not debuggable, as debug is not true'
 
@@ -73,6 +80,7 @@ Tip me over and pour me out</h3>""", 418
 if config['custom-error-pages']:
     @app.errorhandler(HTTPException)
     def page_not_found(e):
+        logging.warning('HTTP error ' + str(e.code))
         return render_template('error.html', error=e, request=request.path, websiteuri=request.base_url, statuscode=e.code), e.code
 
 @app.route('/favicon.ico')

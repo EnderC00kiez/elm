@@ -7,5 +7,6 @@
         "X-Content-Security-Policy": "default-src 'self'",
         "X-Frame-Options": "SAMEORIGIN",
         "Server": "elm/0.2.9"
-    }
+    },
+    "compression-algorithm": "gzip"
 }
